@@ -87,3 +87,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# javey: Python compiled files
+*.pyc
+
+# javey: raw audio file
+*.raw
