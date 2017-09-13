@@ -65,6 +65,12 @@ class ScreenObjectsManager:
             self.selected = None
             self.selected_key = None
 
+    # enables/disables text side-scrolling
+#    def scroll_text(self, enable):
+#        for key in self.text_objects:
+#            self.text_objects[key].scroll_no_fit = enable
+#        for key in self.touch_objects:
+#            self.touch_objects[key].scroll_no_fit = enable
 
 class BaseItem():
     def __init__(self, pos, size):
@@ -84,7 +90,7 @@ class BaseItem():
 
 class TextItem(BaseItem):
 
-    scroll_speed = 2
+    scroll_speed = 3
 
     def __init__(self, font, text, pos, size, center=False, background=None,
                  scroll_no_fit=True, color=(255,255,255)):
@@ -190,19 +196,20 @@ class TextItem(BaseItem):
 
 
 class TouchObject(BaseItem):
-    def __init__(self, pos, size):
+    def __init__(self, pos, size, scroll_no_fit=True):
         BaseItem.__init__(self, pos, size)
         self.active = False
         self.selected = False
         self.selected_box = pygame.Surface(size, pygame.SRCALPHA)
         self.selected_box = self.selected_box.convert_alpha()
-        self.selected_box.fill((0, 127, 0, 128))
+        self.selected_box.fill((0, 63, 0, 128))
         self.selected_box_rectangle = pygame.Surface(size, pygame.SRCALPHA)
         self.selected_box_rectangle = \
             self.selected_box_rectangle.convert_alpha()
         #pygame.draw.rect(self.selected_box_rectangle, (255, 0, 0),
          #                self.selected_box_rectangle.get_rect(),
           #               size[1]/100+1)
+        self.scroll_no_fit = scroll_no_fit
 
     def is_pos_inside(self, pos):
         return self.rect_in_pos.collidepoint(pos)
@@ -220,6 +227,9 @@ class TouchObject(BaseItem):
 
     def pre_render(self, surface):
         if self.selected:
+            self.selected_box = pygame.Surface(self.size, pygame.SRCALPHA)
+            self.selected_box = self.selected_box.convert_alpha()
+            self.selected_box.fill((0, 63, 0, 128))
             surface.blit(self.selected_box, self.pos)
 
     def post_render(self, surface):

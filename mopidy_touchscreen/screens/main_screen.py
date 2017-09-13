@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 class MainScreen(BaseScreen):
     def __init__(self, size, base_size, manager, fonts, cache, core,
-                 background):
+                 background, playqueues=None):
         BaseScreen.__init__(self, size, base_size, manager, fonts)
         self.core = core
         self.track = None

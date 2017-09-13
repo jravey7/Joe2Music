@@ -6,7 +6,7 @@ from ..graphic_utils import ListView
 
 
 class LibraryScreen(BaseScreen):
-    def __init__(self, size, base_size, manager, fonts):
+    def __init__(self, size, base_size, manager, fonts, playqueues=None):
         BaseScreen.__init__(self, size, base_size, manager, fonts)
         self.list_view = ListView((0, 0), (
             self.size[0], self.size[1] -

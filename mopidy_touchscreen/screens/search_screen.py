@@ -7,13 +7,15 @@ from ..graphic_utils import ListView,\
 
 from ..input import InputManager
 
+from play_options import PlayOptions
+
 mode_track_name = 0
 mode_album_name = 1
 mode_artist_name = 2
 
 
 class SearchScreen(BaseScreen):
-    def __init__(self, size, base_size, manager, fonts):
+    def __init__(self, size, base_size, manager, fonts, playqueues=None):
         BaseScreen.__init__(self, size, base_size, manager, fonts)
         self.list_view = ListView((0, self.base_size*2), (
             self.size[0], self.size[1] -
@@ -22,7 +24,8 @@ class SearchScreen(BaseScreen):
         self.results = []
         self.screen_objects = ScreenObjectsManager()
         self.query = ""
-
+        self.playqueues = playqueues
+        
         # Search button
         button = TouchAndTextItem(self.fonts['icon'], u" \ue986",
                                   (0, self.base_size),
@@ -72,6 +75,8 @@ class SearchScreen(BaseScreen):
         self.mode = -1
         self.set_mode(mode=mode_track_name)
         self.set_query("Search")
+        
+        self.play_options_dialog = None
 
     def should_update(self):
         return self.list_view.should_update()
@@ -81,6 +86,9 @@ class SearchScreen(BaseScreen):
         self.screen_objects.render(screen)
         update_all = (update_type == BaseScreen.update_all)
         self.list_view.render(screen, update_all, rects)
+        
+        if self.play_options_dialog != None :
+            self.play_options_dialog.render(screen, update_all, rects)
 
     def set_mode(self, mode=mode_track_name):
         if mode is not self.mode:
@@ -127,30 +135,44 @@ class SearchScreen(BaseScreen):
 
     def touch_event(self, touch_event):
         if touch_event.type == InputManager.click:
-            clicked = self.list_view.touch_event(touch_event)
-            if clicked is not None:
-                x = 0;
-                self.manager.core.tracklist.clear()
-                self.manager.core.tracklist.add(
-                    uri=self.results[clicked].uri)
- #               self.manager.core.playback.play()
+
+            # check if user clicked in play options dialog
+            if ((self.play_options_dialog != None) and (self.play_options_dialog.is_position_in_dialog(touch_event.current_pos))):
+                # TODO the user clicked in the play options dialog, now do something with it (i.e. play song, add to queue, etc.)
+                self.play_options_dialog.touch_event(touch_event)
+                self.play_options_dialog = None         
+                #self.list_view.scroll_text(True)
             else:
-                clicked = self.screen_objects.get_touch_objects_in_pos(
-                    touch_event.down_pos)
-                if len(clicked) > 0:
-                    clicked = clicked[0]
-                    if clicked == self.mode_objects_keys[0]:
-                        self.search(mode=0)
-                    if clicked == self.mode_objects_keys[1]:
-                        self.search(mode=1)
-                    if clicked == self.mode_objects_keys[2]:
-                        self.search(mode=2)
-                    if clicked == "query" or clicked == "search":
-                        self.manager.open_keyboard(self)
+                self.play_options_dialog = None
+                clicked = self.list_view.touch_event(touch_event)            
+                if clicked is not None:
+                    #self.list_view.scroll_text(False)
+                    self.play_options_dialog = PlayOptions(self.size, self.base_size, self.manager, self.fonts, self.results[clicked].uri, self.playqueues)
+                    #self.manager.core.tracklist.clear()
+                    #self.manager.core.tracklist.add(
+                    #    uri=self.results[clicked].uri)
+                    # javey: pull up play options dialog
+                    #self.manager.core.playback.play()
+                else:
+                    clicked = self.screen_objects.get_touch_objects_in_pos(
+                        touch_event.down_pos)
+                    if len(clicked) > 0:
+                        clicked = clicked[0]
+                        if clicked == self.mode_objects_keys[0]:
+                            self.search(mode=0)
+                        if clicked == self.mode_objects_keys[1]:
+                            self.search(mode=1)
+                        if clicked == self.mode_objects_keys[2]:
+                            self.search(mode=2)
+                        if clicked == "query" or clicked == "search":
+                            self.manager.open_keyboard(self)
+        elif touch_event.type == InputManager.long_click:
+            # javey: TODO do something on long click if needed
+            x = 0
         else:
             pos = self.list_view.touch_event(touch_event)
             if pos is not None:
-                x = 0;
+                self.screen_objects.get_touch_object(pos).set_selected()                    
                 self.manager.core.tracklist.clear()
                 self.manager.core.tracklist.add(
                     uri=self.results[pos].uri)

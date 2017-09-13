@@ -9,12 +9,17 @@ logger = logging.getLogger(__name__)
 
 
 class ListView():
-    def __init__(self, pos, size, base_size, font, side_buttons=0):
+
+    # javey: side_buttons is the number of side buttons to display with the list items (starting from the bottom, going up)
+    def __init__(self, pos, size, base_size, font, side_buttons=0, item_base_color=(255,255,255), item_active_color=(128,128,255), item_background_color=None):
         self.size = size
         self.pos = pos
         self.base_size = base_size
         self.screen_objects = ScreenObjectsManager()
         self.max_rows = self.size[1] / self.base_size
+        self.item_background_color = item_background_color
+        self.item_base_color = item_base_color
+        self.item_active_color = item_active_color
         self.current_item = 0
         self.font = font
         self.list_size = 0
@@ -36,7 +41,7 @@ class ListView():
             self.scrollbar = True
             scroll_bar = ScrollBar(
                 (self.pos[0] + self.size[0] - self.base_size,
-                 self.pos[1]),
+                 self.pos[1]+1),
                 (self.base_size, self.size[1]), self.list_size,
                 self.max_rows)
             self.screen_objects.set_touch_object("scrollbar",
@@ -68,9 +73,11 @@ class ListView():
             if z == (self.max_rows - self.side_buttons):
                 #javey: make space for side buttons (between list item and scrollbar)
                 width = self.size[0] - (self.base_size*2)            
-            item = TouchAndTextItem(self.font, self.list[i], (
-                self.pos[0],
-                self.pos[1] + self.base_size * z), (width, -1))
+            item = TouchAndTextItem(self.font, self.list[i], 
+                (self.pos[0], self.pos[1] + self.base_size * z - z), (width, -1),
+                base_color = self.item_base_color,
+                active_color = self.item_active_color,
+                background = self.item_background_color)
             if not item.fit_horizontal:
                 self.update_keys.append(str(i))
             self.screen_objects.set_touch_object(str(i), item)
@@ -205,3 +212,8 @@ class ListView():
                         True)
             except KeyError:
                 pass
+    
+    # enables/disables text side-scrolling
+    def scroll_text(self, enable):
+        self.screen_objects.scroll_text(enable)
+           

@@ -11,7 +11,8 @@ import pygame
 
 from screens import BaseScreen, Keyboard, LibraryScreen, MainScreen, MenuScreen,\
     PlaylistScreen, SearchScreen, Tracklist
-
+    
+from play_queues import PlayQueues
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,9 @@ class ScreenManager():
         self.fonts = {}
         self.background = None
         self.current_screen = library_index
+        
+        # javey: the play queues (should be singleton)
+        self.playqueues = PlayQueues()
 
         # Init variables in init
         self.base_size = None
@@ -60,13 +64,13 @@ class ScreenManager():
         self.fonts['icon'] = pygame.font.Font(font, int(self.base_size*0.9))
         try:
             self.screens = [
-                SearchScreen(size, self.base_size, self, self.fonts),
+                SearchScreen(size, self.base_size, self, self.fonts, self.playqueues),
                 MainScreen(size, self.base_size, self, self.fonts,
-                           self.cache, self.core, self.background),
+                           self.cache, self.core, self.background, self.playqueues),
                 Tracklist(size, self.base_size, self, self.fonts),
-                LibraryScreen(size, self.base_size, self, self.fonts),
+                LibraryScreen(size, self.base_size, self, self.fonts, self.playqueues),
                 PlaylistScreen(size,
-                               self.base_size, self, self.fonts),
+                               self.base_size, self, self.fonts,self.playqueues),
                 MenuScreen(size, self.base_size, self, self.fonts, self.core)]
         except:
             traceback.print_exc()
@@ -75,40 +79,40 @@ class ScreenManager():
         # Menu buttons
 
         button_size = (self.size[0] / 6, self.base_size)
-	button_base = (100,100,100)
-	button_active = (30,215,96)
+        button_base = (100,100,100)
+        button_active = (30,215,96)
 
         # Search button
         button = TouchAndTextItem(self.fonts['icon'], u" \ue986",
-                                  (0, self.size[1] - self.base_size),
+                                  (0, self.size[1] - self.base_size + 2),
                                   button_size, center=True, base_color=button_base, active_color=button_active)
         self.down_bar_objects.set_touch_object("menu_0", button)
         x = button.get_right_pos()
 
         # Main button
         button = TouchAndTextItem(self.fonts['icon'], u" \ue600",
-                                  (x, self.size[1] - self.base_size),
+                                  (x, self.size[1] - self.base_size + 2),
                                   button_size, center=True, base_color=button_base, active_color=button_active)
         self.down_bar_objects.set_touch_object("menu_1", button)
         x = button.get_right_pos()
 
         # Tracklist button
         button = TouchAndTextItem(self.fonts['icon'], u" \ue60d",
-                                  (x, self.size[1] - self.base_size),
+                                  (x, self.size[1] - self.base_size + 2),
                                   button_size, center=True, base_color=button_base, active_color=button_active)
         self.down_bar_objects.set_touch_object("menu_2", button)
         x = button.get_right_pos()
 
         # Library button
         button = TouchAndTextItem(self.fonts['icon'], u" \ue604",
-                                  (x, self.size[1] - self.base_size),
+                                  (x, self.size[1] - self.base_size + 2),
                                   button_size, center=True, base_color=button_base, active_color=button_active)
         self.down_bar_objects.set_touch_object("menu_3", button)
         x = button.get_right_pos()
 
         # Playlist button
         button = TouchAndTextItem(self.fonts['icon'], u" \ue605",
-                                  (x, self.size[1] - self.base_size),
+                                  (x, self.size[1] - self.base_size + 2),
                                   button_size, center=True, base_color=button_base, active_color=button_active)
 
         self.down_bar_objects.set_touch_object("menu_4", button)
@@ -116,7 +120,7 @@ class ScreenManager():
 
         # Menu button
         button = TouchAndTextItem(self.fonts['icon'], u" \ue60a",
-                                  (x, self.size[1] - self.base_size),
+                                  (x, self.size[1] - self.base_size + 2),
                                   button_size,
                                   center=True, base_color=button_base, active_color=button_active)
         self.down_bar_objects.set_touch_object("menu_5", button)
@@ -126,9 +130,9 @@ class ScreenManager():
             (self.size[0], self.size[1] - self.base_size),
             pygame.SRCALPHA)
         
-	# Spotify green
-	#self.down_bar.fill((30, 215, 96, 255))
-	self.down_bar.fill((10, 10, 10, 255))
+        # Spotify green
+        #self.down_bar.fill((30, 215, 96, 255))
+        self.down_bar.fill((10, 10, 10, 255))
 
         self.options_changed()
         self.mute_changed(self.core.playback.mute.get())

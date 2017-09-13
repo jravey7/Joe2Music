@@ -12,7 +12,7 @@ class InputManager():
     long_click = 3
     key = 4
 
-    long_click_min_time = 0.3
+    long_click_min_time = 1.0
 
     up = 0
     down = 1
@@ -34,7 +34,17 @@ class InputManager():
         self.last_key = -1
 
     def event(self, event):
-
+    
+        # javey: attempt at detecting mouse held event
+#        start_time_held = time.time()
+#        while(pygame.mouse.get_pressed()[0]):
+#            pygame.event.clear()
+#            pygame.event.get()
+#            end_time_held = time.time()
+#            if((end_time_held - start_time_held) >= 2.0) :
+#                print("held")
+#                break
+#        pygame.event.clear()
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 4:
                 touch_event = InputEvent(InputManager.swipe,
